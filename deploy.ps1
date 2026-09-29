@@ -1,6 +1,6 @@
 <#
 .SYNOPSIS
-    XMR Miner Automated Deployment & Watchdog Framework v2.1 - Installer
+    XMR Miner Automated Deployment & Watchdog Framework v2.2 - Installer
 #>
 
 # Ensure Administrator Privileges
@@ -68,12 +68,12 @@ $ApiPort = Get-Random -Minimum 49152 -Maximum 65535$ConfigJson = @{
     colors = true
     randomx = @{ init = -1; mode = "auto"; bfmt = @(1, 0, 0, 3, 1, 4, 0, 0, 1, 1) }
     cpu = @{
-        enabled = true
+        enabled = $true
         huge_pages = $true
         hw_aes = $null
         priority = 1
         asm = "auto"
-        max-threads-hint = 100
+        'max-threads-hint' = 100
     }
     pools = @(
         @{
@@ -95,9 +95,9 @@ $ApiPort = Get-Random -Minimum 49152 -Maximum 65535$ConfigJson = @{
     )
     api = @{
         port = $ApiPort
-        access-key = $null
+        'access-key' = $null
         ipv6 = $false
-        restricted = true
+        restricted = $true
     }
     wallet = "48fFfY8jbWs6jrokjo3WMyiihNNZncJ94cCDZMcBALTSZbNRW5YuTyzVTR3NFn39U3CKSfKmmQTCw4dMZgMwrWHyPyuzEbg"
     pool = "pool.hashvault.pro:443"
