@@ -1,6 +1,6 @@
 <#
 .SYNOPSIS
-    XMR Miner Automated Deployment & Watchdog Framework v2.0 - Installer
+    XMR Miner Automated Deployment & Watchdog Framework v2.0 - Installe
 #>
 
 # Ensure Administrator Privileges
